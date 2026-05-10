@@ -1,0 +1,7 @@
+title = "Meridian Atelier Gitleaks Config"
+
+[allowlist]
+description = "Example environment placeholders used for local setup docs"
+paths = [
+  '''^\.env\.example$'''
+]
