@@ -1,4 +1,4 @@
-import { ShippingMethod } from "@prisma/client";
+import { OrderStatus, ShippingMethod } from "@prisma/client";
 import { z } from "zod";
 
 export const signUpSchema = z.object({
@@ -35,6 +35,45 @@ export const checkoutSchema = z.object({
   country: z.string().length(2),
   phone: z.string().min(7).max(20),
   shippingMethod: z.nativeEnum(ShippingMethod)
+});
+
+export const adminProductSchema = z.object({
+  name: z.string().min(2).max(120),
+  slug: z.string().min(2).max(120).regex(/^[a-z0-9-]+$/, "Slug must use lowercase letters, numbers, and hyphens."),
+  description: z.string().min(10).max(500),
+  details: z.string().min(10).max(1000),
+  brand: z.string().min(2).max(80),
+  categoryId: z.string().min(1),
+  price: z.coerce.number().min(0),
+  compareAt: z.union([z.coerce.number().min(0), z.literal("")]).optional(),
+  rating: z.coerce.number().min(0).max(5),
+  reviewCount: z.coerce.number().int().min(0),
+  featured: z.union([z.literal("true"), z.literal("false")]),
+  imageUrl: z.string().url(),
+  imageAlt: z.string().min(2).max(160),
+  variantName: z.string().min(2).max(120),
+  color: z.string().min(1).max(60),
+  size: z.string().min(1).max(60),
+  sku: z.string().min(2).max(120),
+  inventory: z.coerce.number().int().min(0)
+});
+
+export const adminOrderStatusSchema = z.object({
+  orderId: z.string().min(1),
+  status: z.nativeEnum(OrderStatus)
+});
+
+export const adminUserBlockSchema = z.object({
+  userId: z.string().min(1),
+  mode: z.union([z.literal("block"), z.literal("unblock")])
+});
+
+export const reviewSchema = z.object({
+  productId: z.string().min(1),
+  rating: z.coerce.number().int().min(1).max(5),
+  title: z.string().min(3).max(120),
+  body: z.string().min(20).max(1000),
+  imageUrl: z.union([z.string().url(), z.literal("")]).optional()
 });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;

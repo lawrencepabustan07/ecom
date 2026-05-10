@@ -1,8 +1,10 @@
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
+import { redirect } from "next/navigation";
 
 import { ProfileForm } from "@/components/forms";
 import { auth } from "@/lib/auth";
+import { isAdminRole } from "@/lib/access";
 import { getCart } from "@/lib/cart";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
@@ -18,7 +20,7 @@ type AccountWishlistItem = Prisma.WishlistItemGetPayload<{
 export default async function AccountPage() {
   const session = await auth();
 
-  if (!session?.user?.id) {
+  if (!session?.user?.id || session.user.isBlocked) {
     return (
       <div className="mx-auto max-w-3xl px-6 py-16 text-center">
         <h1 className="font-serif text-4xl text-stone-900">Sign in to view your account.</h1>
@@ -27,6 +29,10 @@ export default async function AccountPage() {
         </Link>
       </div>
     );
+  }
+
+  if (isAdminRole(session.user.role)) {
+    redirect("/admin");
   }
 
   const [user, wishlist, orders, cart] = await Promise.all([

@@ -1,8 +1,10 @@
 import { ProductCard } from "@/components/product-card";
 import {
   type CatalogProduct,
+  getBrands,
   getCatalogProducts,
   getCategories,
+  getSizes,
   normalizeCatalogFilters,
 } from "@/lib/catalog";
 
@@ -10,6 +12,11 @@ type ProductsPageProps = {
   searchParams: Promise<{
     search?: string;
     category?: string;
+    brand?: string;
+    size?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    rating?: string;
     sort?: "featured" | "price-asc" | "price-desc" | "newest";
   }>;
 };
@@ -19,9 +26,11 @@ export default async function ProductsPage({
 }: ProductsPageProps) {
   const filters = await searchParams;
   const normalizedFilters = normalizeCatalogFilters(filters);
-  const [products, categories] = await Promise.all([
+  const [products, categories, brands, sizes] = await Promise.all([
     getCatalogProducts(normalizedFilters),
     getCategories(),
+    getBrands(),
+    getSizes(),
   ]);
 
   return (
@@ -48,6 +57,47 @@ export default async function ProductsPage({
                   {category.name}
                 </option>
               ))}
+            </select>
+            <select name="brand" defaultValue={normalizedFilters.brand} className="field" aria-label="Brand">
+              <option value="">All brands</option>
+              {brands.map((brand) => (
+                <option key={brand} value={brand}>
+                  {brand}
+                </option>
+              ))}
+            </select>
+            <select name="size" defaultValue={normalizedFilters.size} className="field" aria-label="Size">
+              <option value="">All sizes</option>
+              {sizes.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <input
+                name="minPrice"
+                type="number"
+                min="0"
+                step="1"
+                defaultValue={normalizedFilters.minPrice}
+                placeholder="Min price (USD)"
+                className="field"
+              />
+              <input
+                name="maxPrice"
+                type="number"
+                min="0"
+                step="1"
+                defaultValue={normalizedFilters.maxPrice}
+                placeholder="Max price (USD)"
+                className="field"
+              />
+            </div>
+            <select name="rating" defaultValue={normalizedFilters.rating} className="field" aria-label="Minimum rating">
+              <option value="">Any rating</option>
+              <option value="4">4 stars & up</option>
+              <option value="4.5">4.5 stars & up</option>
             </select>
             <select
               name="sort"

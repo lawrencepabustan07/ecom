@@ -4,12 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
-import { assertValidCsrfToken } from "@/lib/csrf";
+import { assertValidCsrfRequest } from "@/lib/csrf";
 import { prisma } from "@/lib/prisma";
 
 async function requireSessionUser() {
   const session = await auth();
-  if (!session?.user?.id) {
+  if (!session?.user?.id || session.user.isBlocked) {
     redirect("/login");
   }
 
@@ -17,7 +17,7 @@ async function requireSessionUser() {
 }
 
 export async function toggleWishlist(formData: FormData) {
-  await assertValidCsrfToken(formData);
+  await assertValidCsrfRequest();
   const userId = await requireSessionUser();
   const productId = String(formData.get("productId") ?? "");
 

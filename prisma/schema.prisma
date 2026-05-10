@@ -28,6 +28,7 @@ model User {
   emailVerified DateTime?
   image         String?
   role          String         @default("customer")
+  isBlocked     Boolean        @default(false)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   accounts      Account[]
@@ -36,6 +37,7 @@ model User {
   orders        Order[]
   cart          Cart?
   addresses     ShippingAddress[]
+  reviews       Review[]
 }
 
 model Account {
@@ -102,6 +104,23 @@ model Product {
   variants    ProductVariant[]
   orderItems  OrderItem[]
   wishlist    WishlistItem[]
+  reviews     Review[]
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  title     String
+  body      String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  productId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
 }
 
 model ProductImage {

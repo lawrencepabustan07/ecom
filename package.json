@@ -9,7 +9,7 @@
     "lint": "next lint",
     "test": "vitest run tests/unit",
     "test:watch": "vitest tests/unit",
-    "test:coverage": "vitest run tests/unit --coverage.enabled --coverage.provider=v8 --coverage.reporter=text --coverage.reporter=lcov --coverage.reportsDirectory=coverage --coverage.include=src/lib/auth-helpers.ts --coverage.include=src/lib/catalog.ts --coverage.include=src/lib/cart.ts --coverage.include=src/lib/checkout.ts --coverage.include=src/lib/csrf.ts --coverage.include=src/lib/env.ts --coverage.include=src/lib/validations.ts --coverage.thresholds.lines=80 --coverage.thresholds.statements=80 --coverage.thresholds.functions=80 --coverage.thresholds.branches=80",
+    "test:coverage": "vitest run tests/unit --coverage.enabled --coverage.provider=v8 --coverage.reporter=text --coverage.reporter=lcov --coverage.reportsDirectory=coverage --coverage.include=src/lib/access.ts --coverage.include=src/lib/analytics.ts --coverage.include=src/lib/auth-helpers.ts --coverage.include=src/lib/catalog.ts --coverage.include=src/lib/cart.ts --coverage.include=src/lib/checkout.ts --coverage.include=src/lib/csrf.ts --coverage.include=src/lib/env.ts --coverage.include=src/lib/reviews.ts --coverage.include=src/lib/validations.ts --coverage.thresholds.lines=80 --coverage.thresholds.statements=80 --coverage.thresholds.functions=80 --coverage.thresholds.branches=80",
     "test:e2e": "playwright test",
     "scan:secrets": "gitleaks detect --source . --no-banner",
     "scan:sast": "npm audit --audit-level=high",

@@ -4,7 +4,11 @@ import { mergeTokenIdIntoSession, mergeUserIdIntoToken } from "../../src/lib/aut
 
 describe("auth helpers", () => {
   it("persist the signed-in user id on the JWT subject", () => {
-    expect(mergeUserIdIntoToken({}, { id: "user_123", role: "admin" })).toEqual({ sub: "user_123", role: "admin" });
+    expect(mergeUserIdIntoToken({}, { id: "user_123", role: "admin", isBlocked: false })).toEqual({
+      sub: "user_123",
+      role: "admin",
+      isBlocked: false
+    });
   });
 
   it("leaves the token unchanged when no user id is present", () => {
@@ -19,16 +23,18 @@ describe("auth helpers", () => {
           user: {
             id: "",
             role: "customer",
+            isBlocked: false,
             name: "Meridian Customer"
           }
         },
-        { sub: "user_123", role: "admin" }
+        { sub: "user_123", role: "admin", isBlocked: true }
       )
     ).toEqual({
       expires: new Date("2026-05-10T00:00:00.000Z").toISOString(),
       user: {
         id: "user_123",
         role: "admin",
+        isBlocked: true,
         name: "Meridian Customer"
       }
     });
@@ -42,6 +48,7 @@ describe("auth helpers", () => {
           user: {
             id: "user_123",
             role: "customer",
+            isBlocked: false,
             name: "Meridian Customer"
           }
         },
@@ -52,6 +59,7 @@ describe("auth helpers", () => {
       user: {
         id: "user_123",
         role: "customer",
+        isBlocked: false,
         name: "Meridian Customer"
       }
     });

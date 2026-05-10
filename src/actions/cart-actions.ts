@@ -4,14 +4,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
-import { assertValidCsrfToken } from "@/lib/csrf";
+import { assertValidCsrfRequest } from "@/lib/csrf";
 import { assertInventory, getOrCreateCart } from "@/lib/cart";
 import { prisma } from "@/lib/prisma";
 import { cartInputSchema } from "@/lib/validations";
 
 async function requireSessionUser() {
   const session = await auth();
-  if (!session?.user?.id) {
+  if (!session?.user?.id || session.user.isBlocked) {
     redirect("/login");
   }
 
@@ -19,7 +19,7 @@ async function requireSessionUser() {
 }
 
 export async function addToCart(formData: FormData) {
-  await assertValidCsrfToken(formData);
+  await assertValidCsrfRequest();
   const userId = await requireSessionUser();
   const parsed = cartInputSchema.safeParse({
     variantId: formData.get("variantId"),
@@ -69,7 +69,7 @@ export async function addToCart(formData: FormData) {
 }
 
 export async function updateCartItem(formData: FormData) {
-  await assertValidCsrfToken(formData);
+  await assertValidCsrfRequest();
   const userId = await requireSessionUser();
   const itemId = String(formData.get("itemId") ?? "");
   const quantity = Number(formData.get("quantity"));
@@ -92,7 +92,7 @@ export async function updateCartItem(formData: FormData) {
 }
 
 export async function removeCartItem(formData: FormData) {
-  await assertValidCsrfToken(formData);
+  await assertValidCsrfRequest();
   await requireSessionUser();
   const itemId = String(formData.get("itemId") ?? "");
 

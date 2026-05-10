@@ -1,8 +1,5 @@
-import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-
-const CSRF_COOKIE = "csrf-token";
 
 function buildContentSecurityPolicy() {
   return [
@@ -31,17 +28,6 @@ export function middleware(request: NextRequest) {
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
-
-  if (!request.cookies.get(CSRF_COOKIE)?.value) {
-    response.cookies.set({
-      name: CSRF_COOKIE,
-      value: crypto.randomUUID(),
-      httpOnly: false,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/"
-    });
-  }
 
   return response;
 }

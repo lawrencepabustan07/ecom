@@ -45,6 +45,32 @@ describe("catalog helpers", () => {
     });
   });
 
+  it("build catalog filters for brand, size, price, and rating", () => {
+    expect(
+      buildCatalogWhere({
+        brand: "Atelier Meridian",
+        size: "M",
+        minPrice: 200,
+        maxPrice: 500,
+        rating: 4.5
+      })
+    ).toEqual({
+      brand: "Atelier Meridian",
+      variants: {
+        some: {
+          size: "M"
+        }
+      },
+      rating: {
+        gte: 4.5
+      },
+      price: {
+        gte: 20000,
+        lte: 50000
+      }
+    });
+  });
+
   it("return descending price order", () => {
     expect(buildCatalogOrder("price-desc")).toEqual({ price: "desc" });
   });
@@ -62,11 +88,21 @@ describe("catalog helpers", () => {
       normalizeCatalogFilters({
         search: ["ZAP", "ignored"],
         category: "accessories",
+        brand: "Atelier Meridian",
+        size: "One Size",
+        minPrice: "200",
+        maxPrice: "550",
+        rating: "4.5",
         sort: "bad-value"
       })
     ).toEqual({
       search: "ZAP",
-      category: "accessories"
+      category: "accessories",
+      brand: "Atelier Meridian",
+      size: "One Size",
+      minPrice: 200,
+      maxPrice: 550,
+      rating: 4.5
     });
   });
 
@@ -119,6 +155,18 @@ describe("catalog helpers", () => {
       include: {
         category: true,
         images: true,
+        reviews: {
+          include: {
+            user: {
+              select: {
+                name: true
+              }
+            }
+          },
+          orderBy: {
+            createdAt: "desc"
+          }
+        },
         variants: { include: { inventory: true } }
       }
     });

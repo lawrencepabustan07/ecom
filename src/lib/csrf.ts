@@ -1,25 +1,24 @@
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 
-const CSRF_COOKIE = "csrf-token";
-const CSRF_FIELD = "csrfToken";
-
-export async function getCsrfToken() {
-  const cookieStore = await cookies();
-  return cookieStore.get(CSRF_COOKIE)?.value ?? "";
-}
-
-export function isValidCsrfToken(cookieToken: string, formToken: string) {
-  return Boolean(cookieToken && formToken && cookieToken === formToken);
-}
-
-export async function assertValidCsrfToken(formData: FormData) {
-  const cookieStore = await cookies();
-  const cookieToken = cookieStore.get(CSRF_COOKIE)?.value ?? "";
-  const formToken = String(formData.get(CSRF_FIELD) ?? "");
-
-  if (!isValidCsrfToken(cookieToken, formToken)) {
-    throw new Error("Invalid CSRF token.");
+function parseOriginHost(value: string) {
+  try {
+    return new URL(value).host;
+  } catch {
+    return "";
   }
 }
 
-export { CSRF_FIELD };
+export function isAllowedCsrfOrigin(origin: string, host: string) {
+  return Boolean(origin && host && parseOriginHost(origin) === host);
+}
+
+export async function assertValidCsrfRequest() {
+  const headerStore = await headers();
+  const origin = headerStore.get("origin") ?? headerStore.get("referer") ?? "";
+  const forwardedHost = headerStore.get("x-forwarded-host");
+  const host = forwardedHost ?? headerStore.get("host") ?? "";
+
+  if (!isAllowedCsrfOrigin(origin, host)) {
+    throw new Error("Invalid CSRF request origin.");
+  }
+}

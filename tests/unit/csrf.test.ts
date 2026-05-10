@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { isValidCsrfToken } from "../../src/lib/csrf";
+import { isAllowedCsrfOrigin } from "../../src/lib/csrf";
 
 describe("csrf helpers", () => {
-  it("accept matching cookie and form tokens", () => {
-    expect(isValidCsrfToken("token-123", "token-123")).toBe(true);
+  it("accept matching origin and host", () => {
+    expect(isAllowedCsrfOrigin("http://127.0.0.1:3000", "127.0.0.1:3000")).toBe(true);
   });
 
-  it("reject missing or mismatched tokens", () => {
-    expect(isValidCsrfToken("", "token-123")).toBe(false);
-    expect(isValidCsrfToken("token-123", "")).toBe(false);
-    expect(isValidCsrfToken("token-123", "token-456")).toBe(false);
+  it("reject missing or mismatched origins", () => {
+    expect(isAllowedCsrfOrigin("", "127.0.0.1:3000")).toBe(false);
+    expect(isAllowedCsrfOrigin("http://127.0.0.1:3000", "")).toBe(false);
+    expect(isAllowedCsrfOrigin("http://evil.example", "127.0.0.1:3000")).toBe(false);
   });
 });

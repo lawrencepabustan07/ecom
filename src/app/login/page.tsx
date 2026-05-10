@@ -11,6 +11,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const errorMessage =
     params.error === "invalid_credentials"
       ? "The email or password was not accepted."
+      : params.error === "blocked"
+        ? "This account has been blocked. Contact an administrator."
       : params.error === "google_not_configured"
         ? "Google sign-in is not configured in the current environment."
         : null;

@@ -46,6 +46,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
+        if (user.isBlocked) {
+          return null;
+        }
+
         const matches = await compare(parsed.data.password, user.passwordHash);
         if (!matches) {
           return null;
@@ -56,13 +60,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           name: user.name,
           email: user.email,
           image: user.image,
-          role: user.role
+          role: user.role,
+          isBlocked: user.isBlocked
         };
       }
     })
   ],
   callbacks: {
     jwt: async ({ token, user }) => {
+      if (token.sub) {
+        const currentUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: {
+            role: true,
+            isBlocked: true
+          }
+        });
+
+        if (currentUser) {
+          token.role = currentUser.role;
+          token.isBlocked = currentUser.isBlocked;
+        }
+      }
+
       return mergeUserIdIntoToken(token, user);
     },
     session: async ({ session, token }) => {

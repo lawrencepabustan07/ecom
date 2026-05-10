@@ -1,9 +1,12 @@
 import Link from "next/link";
 
 import { auth, signOut } from "@/lib/auth";
+import { getDashboardPathForRole, isAdminRole } from "@/lib/access";
 
 export async function Header() {
   const session = await auth();
+  const dashboardPath = getDashboardPathForRole(session?.user?.role);
+  const showAdminLink = isAdminRole(session?.user?.role);
 
   return (
     <header className="border-b border-black/10">
@@ -14,7 +17,8 @@ export async function Header() {
         <nav className="flex items-center gap-5 text-sm uppercase tracking-[0.18em] text-stone-700">
           <Link href="/products">Shop</Link>
           <Link href="/cart">Cart</Link>
-          {session?.user ? <Link href="/account">Account</Link> : <Link href="/login">Login</Link>}
+          {showAdminLink ? <Link href="/admin">Admin</Link> : null}
+          {session?.user ? <Link href={dashboardPath}>{showAdminLink ? "Dashboard" : "Account"}</Link> : <Link href="/login">Login</Link>}
           {session?.user ? (
             <form
               action={async () => {

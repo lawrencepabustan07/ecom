@@ -5,15 +5,16 @@ import crypto from "node:crypto";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 
+import { assertValidCsrfRequest } from "@/lib/csrf";
+import { getDashboardPathForRole } from "@/lib/access";
 import { isGoogleAuthConfigured } from "@/lib/env";
-import { assertValidCsrfToken } from "@/lib/csrf";
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/email";
 import { signIn } from "@/lib/auth";
 import { profileSchema, signUpSchema } from "@/lib/validations";
 
 export async function registerUser(formData: FormData) {
-  await assertValidCsrfToken(formData);
+  await assertValidCsrfRequest();
   const parsed = signUpSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
@@ -43,20 +44,28 @@ export async function registerUser(formData: FormData) {
   await signIn("credentials", {
     email: parsed.data.email,
     password: parsed.data.password,
-    redirectTo: "/account"
+    redirectTo: getDashboardPathForRole("customer")
   });
 }
 
 export async function loginUser(formData: FormData) {
-  await assertValidCsrfToken(formData);
+  await assertValidCsrfRequest();
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
+  const user = await prisma.user.findUnique({
+    where: { email: email.trim().toLowerCase() },
+    select: { role: true, isBlocked: true }
+  });
+
+  if (user?.isBlocked) {
+    redirect("/login?error=blocked");
+  }
 
   try {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/account"
+      redirectTo: getDashboardPathForRole(user?.role)
     });
   } catch (error) {
     if (error instanceof AuthError) {
@@ -68,7 +77,8 @@ export async function loginUser(formData: FormData) {
 }
 
 export async function loginWithGoogle(formData: FormData) {
-  await assertValidCsrfToken(formData);
+  void formData;
+  await assertValidCsrfRequest();
   if (!isGoogleAuthConfigured()) {
     redirect("/login?error=google_not_configured");
   }
@@ -79,7 +89,7 @@ export async function loginWithGoogle(formData: FormData) {
 }
 
 export async function updateProfile(userId: string, formData: FormData) {
-  await assertValidCsrfToken(formData);
+  await assertValidCsrfRequest();
   const parsed = profileSchema.safeParse({
     name: formData.get("name")
   });
@@ -97,7 +107,7 @@ export async function updateProfile(userId: string, formData: FormData) {
 }
 
 export async function requestPasswordReset(formData: FormData) {
-  await assertValidCsrfToken(formData);
+  await assertValidCsrfRequest();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   if (!email) {
     throw new Error("Email is required.");
@@ -127,7 +137,7 @@ export async function requestPasswordReset(formData: FormData) {
 }
 
 export async function completePasswordReset(token: string, formData: FormData) {
-  await assertValidCsrfToken(formData);
+  await assertValidCsrfRequest();
   const password = String(formData.get("password") ?? "");
   const parsed = signUpSchema.pick({ password: true }).safeParse({ password });
 
