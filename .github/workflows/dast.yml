@@ -1,6 +1,12 @@
 name: DAST
 
 on:
+  push:
+    branches:
+      - main
+      - "feature/**"
+      - "bugfix/**"
+      - "chore/**"
   pull_request:
   workflow_dispatch:
 
