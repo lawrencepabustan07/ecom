@@ -27,9 +27,9 @@ describe("catalog helpers", () => {
   it("build a case-insensitive search where clause", () => {
     expect(buildCatalogWhere({ search: "coat" })).toEqual({
       OR: [
-        { name: { contains: "coat", mode: "insensitive" } },
-        { brand: { contains: "coat", mode: "insensitive" } },
-        { description: { contains: "coat", mode: "insensitive" } }
+        { name: { contains: "coat" } },
+        { brand: { contains: "coat" } },
+        { description: { contains: "coat" } }
       ]
     });
   });
@@ -38,9 +38,9 @@ describe("catalog helpers", () => {
     expect(buildCatalogWhere({ search: "  knit  ", category: "knitwear" })).toEqual({
       category: { slug: "knitwear" },
       OR: [
-        { name: { contains: "knit", mode: "insensitive" } },
-        { brand: { contains: "knit", mode: "insensitive" } },
-        { description: { contains: "knit", mode: "insensitive" } }
+        { name: { contains: "knit" } },
+        { brand: { contains: "knit" } },
+        { description: { contains: "knit" } }
       ]
     });
   });

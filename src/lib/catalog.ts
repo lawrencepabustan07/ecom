@@ -92,9 +92,9 @@ export function buildCatalogWhere(filters: CatalogFilters) {
     ...(search
       ? {
           OR: [
-            { name: { contains: search, mode: "insensitive" as const } },
-            { brand: { contains: search, mode: "insensitive" as const } },
-            { description: { contains: search, mode: "insensitive" as const } },
+            { name: { contains: search } },
+            { brand: { contains: search } },
+            { description: { contains: search } },
           ],
         }
       : {}),
