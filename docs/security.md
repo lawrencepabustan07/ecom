@@ -34,6 +34,9 @@ Meridian Atelier is a single-region e-commerce storefront built with Next.js, Pr
 
 ## Required Operational Controls
 - Run `gitleaks` pre-commit and in CI.
+- Enforce unit-test coverage in CI with `vitest` thresholds set to at least 80% across covered security-relevant library logic.
 - Generate SBOM artifacts in CI using CycloneDX.
-- Reject releases with high or critical dependency findings.
-- Add DAST, IaC scanning, and container scanning as deployment assets are introduced.
+- Run GitHub CodeQL and dependency review in the `sast.yml` workflow.
+- Reject builds when `npm audit` reports high or critical production dependency findings.
+- Run OWASP ZAP baseline scanning against the locally started application in the `dast.yml` workflow.
+- Add IaC scanning and container scanning when deployment assets are introduced.

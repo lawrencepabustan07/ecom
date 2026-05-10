@@ -1,30 +1,55 @@
-import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, expect, it } from "vitest";
 
-import { mergeTokenIdIntoSession, mergeUserIdIntoToken } from "@/lib/auth";
+import { mergeTokenIdIntoSession, mergeUserIdIntoToken } from "../../src/lib/auth-helpers";
 
-test("auth helpers persist the signed-in user id on the JWT subject", () => {
-  assert.deepEqual(mergeUserIdIntoToken({}, { id: "user_123" }), { sub: "user_123" });
-});
+describe("auth helpers", () => {
+  it("persist the signed-in user id on the JWT subject", () => {
+    expect(mergeUserIdIntoToken({}, { id: "user_123" })).toEqual({ sub: "user_123" });
+  });
 
-test("auth helpers expose the JWT subject on the session user", () => {
-  assert.deepEqual(
-    mergeTokenIdIntoSession(
-      {
-        expires: new Date("2026-05-10T00:00:00.000Z").toISOString(),
-        user: {
-          id: "",
-          name: "Meridian Customer"
-        }
-      },
-      { sub: "user_123" }
-    ),
-    {
+  it("leaves the token unchanged when no user id is present", () => {
+    expect(mergeUserIdIntoToken({ sub: "existing" }, {})).toEqual({ sub: "existing" });
+  });
+
+  it("expose the JWT subject on the session user", () => {
+    expect(
+      mergeTokenIdIntoSession(
+        {
+          expires: new Date("2026-05-10T00:00:00.000Z").toISOString(),
+          user: {
+            id: "",
+            name: "Meridian Customer"
+          }
+        },
+        { sub: "user_123" }
+      )
+    ).toEqual({
       expires: new Date("2026-05-10T00:00:00.000Z").toISOString(),
       user: {
         id: "user_123",
         name: "Meridian Customer"
       }
-    }
-  );
+    });
+  });
+
+  it("leaves the session unchanged when the token subject is missing", () => {
+    expect(
+      mergeTokenIdIntoSession(
+        {
+          expires: new Date("2026-05-10T00:00:00.000Z").toISOString(),
+          user: {
+            id: "user_123",
+            name: "Meridian Customer"
+          }
+        },
+        {}
+      )
+    ).toEqual({
+      expires: new Date("2026-05-10T00:00:00.000Z").toISOString(),
+      user: {
+        id: "user_123",
+        name: "Meridian Customer"
+      }
+    });
+  });
 });

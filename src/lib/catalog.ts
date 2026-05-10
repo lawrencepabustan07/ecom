@@ -1,5 +1,5 @@
 import type { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "./prisma";
 
 export type CatalogFilters = {
   search?: string;
@@ -73,7 +73,7 @@ export async function getCatalogProducts(
 }
 
 export async function getCategories(): Promise<
-  Prisma.CategoryGetPayload<{}>[]
+  Prisma.CategoryGetPayload<Record<string, never>>[]
 > {
   return prisma.category.findMany({
     orderBy: { name: "asc" },

@@ -1,30 +1,13 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { compare } from "bcryptjs";
 import NextAuth from "next-auth";
-import type { Session } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import type { JWT } from "next-auth/jwt";
 
-import { isGoogleAuthConfigured } from "@/lib/env";
-import { prisma } from "@/lib/prisma";
-import { signInSchema } from "@/lib/validations";
-
-export function mergeUserIdIntoToken(token: JWT, user?: { id?: string }) {
-  if (user?.id) {
-    token.sub = user.id;
-  }
-
-  return token;
-}
-
-export function mergeTokenIdIntoSession(session: Session, token: JWT) {
-  if (session.user && token.sub) {
-    session.user.id = token.sub;
-  }
-
-  return session;
-}
+import { mergeTokenIdIntoSession, mergeUserIdIntoToken } from "./auth-helpers";
+import { isGoogleAuthConfigured } from "./env";
+import { prisma } from "./prisma";
+import { signInSchema } from "./validations";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
