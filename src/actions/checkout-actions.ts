@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getCart, calculateCartTotals } from "@/lib/cart";
 import { calculateOrderTotal, getShippingAmount } from "@/lib/checkout";
+import { assertValidCsrfToken } from "@/lib/csrf";
 import { sendOrderConfirmationEmail } from "@/lib/email";
 import { isStripeConfigured } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
@@ -13,6 +14,7 @@ import { getStripe } from "@/lib/stripe";
 import { checkoutSchema } from "@/lib/validations";
 
 export async function createCheckoutSession(formData: FormData) {
+  await assertValidCsrfToken(formData);
   const session = await auth();
   if (!session?.user?.id || !session.user.email) {
     redirect("/login");

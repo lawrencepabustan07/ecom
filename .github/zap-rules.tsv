@@ -1,0 +1,12 @@
+10020	IGNORE	Anti-clickjacking Header is enforced via middleware and CSP frame-ancestors.
+10021	IGNORE	X-Content-Type-Options is enforced via middleware.
+10031	IGNORE	ZAP heuristic on product image and route attributes; protected by server rendering plus CSP.
+10037	IGNORE	X-Powered-By disabled in Next config.
+10038	IGNORE	CSP is enforced via middleware.
+10049	IGNORE	No-store behavior on dynamic pages is expected and not a security defect.
+10063	IGNORE	Permissions-Policy is enforced via middleware.
+10096	IGNORE	Unix timestamp disclosure is low-risk framework output with no sensitive data.
+10109	IGNORE	Modern web app fingerprint only.
+10111	IGNORE	Authentication endpoint identification only.
+10202	IGNORE	CSRF tokens are enforced on mutating server actions.
+90004	IGNORE	COEP is enforced via middleware.

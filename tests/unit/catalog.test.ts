@@ -17,7 +17,7 @@ vi.mock("../../src/lib/prisma", () => ({
 }));
 
 import { buildCatalogOrder, buildCatalogWhere } from "../../src/lib/catalog";
-import { getCatalogProducts, getCategories, getFeaturedProducts, getProductBySlug } from "../../src/lib/catalog";
+import { getCatalogProducts, getCategories, getFeaturedProducts, getProductBySlug, normalizeCatalogFilters } from "../../src/lib/catalog";
 
 describe("catalog helpers", () => {
   afterEach(() => {
@@ -55,6 +55,19 @@ describe("catalog helpers", () => {
 
   it("default to featured-first ordering", () => {
     expect(buildCatalogOrder("featured")).toEqual([{ featured: "desc" }, { createdAt: "desc" }]);
+  });
+
+  it("normalize repeated and invalid query parameters safely", () => {
+    expect(
+      normalizeCatalogFilters({
+        search: ["ZAP", "ignored"],
+        category: "accessories",
+        sort: "bad-value"
+      })
+    ).toEqual({
+      search: "ZAP",
+      category: "accessories"
+    });
   });
 
   it("query featured products with the expected relation graph", async () => {

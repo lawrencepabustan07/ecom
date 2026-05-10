@@ -176,6 +176,23 @@ async function main() {
       phone: "+1 212 555 0183"
     }
   });
+
+  if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
+    await prisma.user.upsert({
+      where: { email: process.env.ADMIN_EMAIL.toLowerCase() },
+      update: {
+        name: process.env.ADMIN_NAME?.trim() || "Admin User",
+        passwordHash: hashSync(process.env.ADMIN_PASSWORD, 10),
+        role: "admin"
+      },
+      create: {
+        name: process.env.ADMIN_NAME?.trim() || "Admin User",
+        email: process.env.ADMIN_EMAIL.toLowerCase(),
+        passwordHash: hashSync(process.env.ADMIN_PASSWORD, 10),
+        role: "admin"
+      }
+    });
+  }
 }
 
 main()

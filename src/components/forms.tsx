@@ -12,14 +12,22 @@ import {
 } from "@/actions/auth-actions";
 import { toggleWishlist } from "@/actions/wishlist-actions";
 import { isGoogleAuthConfigured, isStripeConfigured } from "@/lib/env";
+import { CSRF_FIELD, getCsrfToken } from "@/lib/csrf";
 import { formatPrice } from "@/lib/utils";
 
-export function LoginForm() {
+async function CsrfTokenField() {
+  const token = await getCsrfToken();
+
+  return <input type="hidden" name={CSRF_FIELD} value={token} />;
+}
+
+export async function LoginForm() {
   const showGoogle = isGoogleAuthConfigured();
 
   return (
     <div className="space-y-4 rounded-[2rem] border border-black/10 bg-white p-8">
       <form action={loginUser} className="space-y-4">
+        <CsrfTokenField />
         <input name="email" type="email" placeholder="Email" className="field" />
         <input name="password" type="password" placeholder="Password" className="field" />
         <button type="submit" className="button-primary w-full">
@@ -28,6 +36,7 @@ export function LoginForm() {
       </form>
       {showGoogle ? (
         <form action={loginWithGoogle}>
+          <CsrfTokenField />
           <button type="submit" className="button-secondary w-full">
             Continue with Google
           </button>
@@ -39,9 +48,10 @@ export function LoginForm() {
   );
 }
 
-export function RegisterForm() {
+export async function RegisterForm() {
   return (
     <form action={registerUser} className="space-y-4 rounded-[2rem] border border-black/10 bg-white p-8">
+      <CsrfTokenField />
       <input name="name" placeholder="Full name" className="field" />
       <input name="email" type="email" placeholder="Email" className="field" />
       <input name="password" type="password" placeholder="Password" className="field" />
@@ -52,9 +62,10 @@ export function RegisterForm() {
   );
 }
 
-export function AddToCartForm({ variantId }: { variantId: string }) {
+export async function AddToCartForm({ variantId }: { variantId: string }) {
   return (
     <form action={addToCart} className="flex items-center gap-3">
+      <CsrfTokenField />
       <input type="hidden" name="variantId" value={variantId} />
       <input type="hidden" name="quantity" value="1" />
       <button type="submit" className="button-primary">
@@ -64,9 +75,10 @@ export function AddToCartForm({ variantId }: { variantId: string }) {
   );
 }
 
-export function WishlistButton({ productId }: { productId: string }) {
+export async function WishlistButton({ productId }: { productId: string }) {
   return (
     <form action={toggleWishlist}>
+      <CsrfTokenField />
       <input type="hidden" name="productId" value={productId} />
       <button type="submit" className="button-secondary">
         Toggle wishlist
@@ -75,10 +87,11 @@ export function WishlistButton({ productId }: { productId: string }) {
   );
 }
 
-export function CartItemForm({ itemId, quantity }: { itemId: string; quantity: number }) {
+export async function CartItemForm({ itemId, quantity }: { itemId: string; quantity: number }) {
   return (
     <div className="flex items-center gap-3">
       <form action={updateCartItem} className="flex items-center gap-2">
+        <CsrfTokenField />
         <input type="hidden" name="itemId" value={itemId} />
         <input type="number" name="quantity" defaultValue={quantity} min={1} max={10} className="field w-20" />
         <button type="submit" className="button-secondary">
@@ -86,6 +99,7 @@ export function CartItemForm({ itemId, quantity }: { itemId: string; quantity: n
         </button>
       </form>
       <form action={removeCartItem}>
+        <CsrfTokenField />
         <input type="hidden" name="itemId" value={itemId} />
         <button type="submit" className="text-sm uppercase tracking-[0.18em] text-stone-500">
           Remove
@@ -95,9 +109,10 @@ export function CartItemForm({ itemId, quantity }: { itemId: string; quantity: n
   );
 }
 
-export function ProfileForm({ userId, defaultName }: { userId: string; defaultName: string | null }) {
+export async function ProfileForm({ userId, defaultName }: { userId: string; defaultName: string | null }) {
   return (
     <form action={updateProfile.bind(null, userId)} className="space-y-4 rounded-[2rem] border border-black/10 bg-white p-8">
+      <CsrfTokenField />
       <input name="name" defaultValue={defaultName ?? ""} className="field" />
       <button type="submit" className="button-primary">
         Save profile
@@ -106,11 +121,12 @@ export function ProfileForm({ userId, defaultName }: { userId: string; defaultNa
   );
 }
 
-export function CheckoutForm({ subtotal }: { subtotal: number }) {
+export async function CheckoutForm({ subtotal }: { subtotal: number }) {
   const stripeReady = isStripeConfigured();
 
   return (
     <form action={createCheckoutSession} className="grid gap-4 rounded-[2rem] border border-black/10 bg-white p-8">
+      <CsrfTokenField />
       <div className="grid gap-4 md:grid-cols-2">
         <input name="name" placeholder="Full name" className="field" />
         <input name="phone" placeholder="Phone" className="field" />
@@ -145,9 +161,10 @@ export function CheckoutForm({ subtotal }: { subtotal: number }) {
   );
 }
 
-export function PasswordResetRequestForm() {
+export async function PasswordResetRequestForm() {
   return (
     <form action={requestPasswordReset} className="space-y-4 rounded-[2rem] border border-black/10 bg-white p-8">
+      <CsrfTokenField />
       <input name="email" type="email" placeholder="Email" className="field" />
       <button type="submit" className="button-primary w-full">
         Send reset link
@@ -156,9 +173,10 @@ export function PasswordResetRequestForm() {
   );
 }
 
-export function PasswordResetForm({ token, email }: { token: string; email: string }) {
+export async function PasswordResetForm({ token, email }: { token: string; email: string }) {
   return (
     <form action={completePasswordReset.bind(null, token)} className="space-y-4 rounded-[2rem] border border-black/10 bg-white p-8">
+      <CsrfTokenField />
       <input type="hidden" name="email" value={email} />
       <input name="password" type="password" placeholder="New password" className="field" />
       <button type="submit" className="button-primary w-full">

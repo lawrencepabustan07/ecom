@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/lib/auth";
+import { assertValidCsrfToken } from "@/lib/csrf";
 import { prisma } from "@/lib/prisma";
 
 async function requireSessionUser() {
@@ -16,6 +17,7 @@ async function requireSessionUser() {
 }
 
 export async function toggleWishlist(formData: FormData) {
+  await assertValidCsrfToken(formData);
   const userId = await requireSessionUser();
   const productId = String(formData.get("productId") ?? "");
 

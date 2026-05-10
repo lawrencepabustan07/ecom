@@ -4,7 +4,7 @@ import { mergeTokenIdIntoSession, mergeUserIdIntoToken } from "../../src/lib/aut
 
 describe("auth helpers", () => {
   it("persist the signed-in user id on the JWT subject", () => {
-    expect(mergeUserIdIntoToken({}, { id: "user_123" })).toEqual({ sub: "user_123" });
+    expect(mergeUserIdIntoToken({}, { id: "user_123", role: "admin" })).toEqual({ sub: "user_123", role: "admin" });
   });
 
   it("leaves the token unchanged when no user id is present", () => {
@@ -18,15 +18,17 @@ describe("auth helpers", () => {
           expires: new Date("2026-05-10T00:00:00.000Z").toISOString(),
           user: {
             id: "",
+            role: "customer",
             name: "Meridian Customer"
           }
         },
-        { sub: "user_123" }
+        { sub: "user_123", role: "admin" }
       )
     ).toEqual({
       expires: new Date("2026-05-10T00:00:00.000Z").toISOString(),
       user: {
         id: "user_123",
+        role: "admin",
         name: "Meridian Customer"
       }
     });
@@ -39,6 +41,7 @@ describe("auth helpers", () => {
           expires: new Date("2026-05-10T00:00:00.000Z").toISOString(),
           user: {
             id: "user_123",
+            role: "customer",
             name: "Meridian Customer"
           }
         },
@@ -48,6 +51,7 @@ describe("auth helpers", () => {
       expires: new Date("2026-05-10T00:00:00.000Z").toISOString(),
       user: {
         id: "user_123",
+        role: "customer",
         name: "Meridian Customer"
       }
     });

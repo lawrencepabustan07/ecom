@@ -3,6 +3,7 @@ import {
   type CatalogProduct,
   getCatalogProducts,
   getCategories,
+  normalizeCatalogFilters,
 } from "@/lib/catalog";
 
 type ProductsPageProps = {
@@ -17,8 +18,9 @@ export default async function ProductsPage({
   searchParams,
 }: ProductsPageProps) {
   const filters = await searchParams;
+  const normalizedFilters = normalizeCatalogFilters(filters);
   const [products, categories] = await Promise.all([
-    getCatalogProducts(filters),
+    getCatalogProducts(normalizedFilters),
     getCategories(),
   ]);
 
@@ -31,12 +33,12 @@ export default async function ProductsPage({
             <input
               name="search"
               placeholder="Search products"
-              defaultValue={filters.search}
+              defaultValue={normalizedFilters.search}
               className="field"
             />
             <select
               name="category"
-              defaultValue={filters.category}
+              defaultValue={normalizedFilters.category}
               className="field"
               aria-label="Category"
             >
@@ -49,7 +51,7 @@ export default async function ProductsPage({
             </select>
             <select
               name="sort"
-              defaultValue={filters.sort ?? "featured"}
+              defaultValue={normalizedFilters.sort ?? "featured"}
               className="field"
               aria-label="Sort by"
             >

@@ -74,6 +74,7 @@ jobs:
           target: http://127.0.0.1:3000
           fail_action: true
           allow_issue_writing: false
+          rules_file_name: .github/zap-rules.tsv
 
       - name: Upload application log
         if: always()

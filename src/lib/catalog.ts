@@ -1,4 +1,6 @@
 import type { Prisma } from "@prisma/client";
+import { z } from "zod";
+
 import { prisma } from "./prisma";
 
 export type CatalogFilters = {
@@ -14,6 +16,33 @@ export type CatalogProduct = Prisma.ProductGetPayload<{
     variants: { include: { inventory: true } };
   };
 }>;
+
+const catalogQuerySchema = z.object({
+  search: z.union([z.string(), z.array(z.string())]).optional(),
+  category: z.union([z.string(), z.array(z.string())]).optional(),
+  sort: z.union([z.string(), z.array(z.string())]).optional()
+});
+
+function coerceQueryValue(value?: string | string[]) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export function normalizeCatalogFilters(rawFilters: unknown): CatalogFilters {
+  const parsed = catalogQuerySchema.safeParse(rawFilters);
+  if (!parsed.success) {
+    return {};
+  }
+
+  const search = coerceQueryValue(parsed.data.search)?.trim();
+  const category = coerceQueryValue(parsed.data.category)?.trim();
+  const sort = coerceQueryValue(parsed.data.sort);
+
+  return {
+    ...(search ? { search } : {}),
+    ...(category ? { category } : {}),
+    ...(sort === "featured" || sort === "price-asc" || sort === "price-desc" || sort === "newest" ? { sort } : {})
+  };
+}
 
 export function buildCatalogWhere(filters: CatalogFilters) {
   const search = filters.search?.trim();

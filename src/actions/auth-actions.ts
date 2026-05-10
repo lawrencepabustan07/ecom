@@ -6,12 +6,14 @@ import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 
 import { isGoogleAuthConfigured } from "@/lib/env";
+import { assertValidCsrfToken } from "@/lib/csrf";
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/email";
 import { signIn } from "@/lib/auth";
 import { profileSchema, signUpSchema } from "@/lib/validations";
 
 export async function registerUser(formData: FormData) {
+  await assertValidCsrfToken(formData);
   const parsed = signUpSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
@@ -46,6 +48,7 @@ export async function registerUser(formData: FormData) {
 }
 
 export async function loginUser(formData: FormData) {
+  await assertValidCsrfToken(formData);
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
 
@@ -64,7 +67,8 @@ export async function loginUser(formData: FormData) {
   }
 }
 
-export async function loginWithGoogle() {
+export async function loginWithGoogle(formData: FormData) {
+  await assertValidCsrfToken(formData);
   if (!isGoogleAuthConfigured()) {
     redirect("/login?error=google_not_configured");
   }
@@ -75,6 +79,7 @@ export async function loginWithGoogle() {
 }
 
 export async function updateProfile(userId: string, formData: FormData) {
+  await assertValidCsrfToken(formData);
   const parsed = profileSchema.safeParse({
     name: formData.get("name")
   });
@@ -92,6 +97,7 @@ export async function updateProfile(userId: string, formData: FormData) {
 }
 
 export async function requestPasswordReset(formData: FormData) {
+  await assertValidCsrfToken(formData);
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   if (!email) {
     throw new Error("Email is required.");
@@ -121,6 +127,7 @@ export async function requestPasswordReset(formData: FormData) {
 }
 
 export async function completePasswordReset(token: string, formData: FormData) {
+  await assertValidCsrfToken(formData);
   const password = String(formData.get("password") ?? "");
   const parsed = signUpSchema.pick({ password: true }).safeParse({ password });
 
